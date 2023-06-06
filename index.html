@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eCommerce</title>
+</head>
+
+<body>
+    <form id="frm">
+        <label for="price">Selleing Price</label>
+        <input type="text" id="price" required>
+        <label for="product">Product Name</label>
+        <input type="text" id="product" required>
+        <label for="cat">Choose a Category</label>
+        <select id="cat" required>
+            <option value="Food">Food</option>
+            <option value="Electronic">Electronic</option>
+            <option value="Skincare">Skin Care</option>
+            <input type="submit" value="Add Product">
+        </select>
+    </form>
+    <div id="list">
+        <h2>Products</h2>
+        <h3>Eleectronic Items</h3>
+        <ul id="electronic_itmes"></ul>
+        <h3>Food Items</h3>
+        <ul id="food_items"></ul>
+        <h3>Skincare Items</h3>
+        <ul id="skincare_itmes"></ul>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js" integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="./script.js"></script>
+    <script>
+
+        var frm = document.getElementById("frm");
+        frm.addEventListener("submit", addProduct);
+
+        window.addEventListener("DOMContentLoaded", displayListFromCrudCrud);
+
+        function addProduct(e) {
+            e.preventDefault();
+            console.log("add");
+            var productObj = {
+                price: document.getElementById("price").value,
+                product: document.getElementById("product").value,
+                cat: document.getElementById("cat").value
+            }
+            //post request
+            axios.post("https://crudcrud.com/api/4cdeedbfcd214cd890473875d3178f37/seller_admin",productObj)
+            .then((result) => {
+                //console.log(result);
+                display(result.data);
+            }).catch((err) => {
+                console.log(err);
+            });
+        }
+        function display(obj) {
+            var text = obj.price + "-" + obj.cat + "-" + obj.product;
+            console.log(text);
+            var newEle = document.createElement("li");
+            newEle.appendChild(document.createTextNode(text));
+            var delBut = document.createElement("button");
+            delBut.innerText = "Delete Order";
+            delBut.className = "delete";
+            delBut.setAttribute("data-id",obj._id);
+            newEle.appendChild(delBut);
+            console.log(obj.cat);
+            if (obj.cat == "Food") {
+                document.getElementById("food_items").appendChild(newEle);
+            } else if (obj.cat == "Electronic") {
+                document.getElementById("electronic_itmes").appendChild(newEle);
+
+            } else if (obj.cat == "Skincare") {
+                document.getElementById("skincare_itmes").appendChild(newEle);
+            }
+        }
+        function displayListFromCrudCrud() {
+            //get request
+            axios.get("https://crudcrud.com/api/4cdeedbfcd214cd890473875d3178f37/seller_admin")
+            .then(res=>{
+                res.data.forEach((obj)=>{
+                    display(obj);
+                })
+            })
+            .catch(err=>{console.log(err)});
+        }
+        //delete order
+        document.getElementById("list").addEventListener("click",deleteItem);
+        function deleteItem(e){
+            if(e.target.classList.contains("delete")){
+                var id=e.target.dataset.id;
+                //delete request
+                axios.delete("https://crudcrud.com/api/4cdeedbfcd214cd890473875d3178f37/seller_admin/"+id)
+                .then(res=>console.log("deleted"))
+                .catch(err=>console.log(err));
+                //delete element
+                e.target.parentElement.remove();
+            }
+        }
+    </script>
+</body>
+
+</html>
